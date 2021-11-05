@@ -1,0 +1,1055 @@
+{
+  "Resources": {
+    "MatildaClusterRoleEC871D08": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "eks.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/AmazonEKSClusterPolicy"
+              ]
+            ]
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "matilda-cluster",
+            "Value": "it-s-me"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "matilda-cluster2/MatildaCluster/Role/Resource"
+      }
+    },
+    "MatildaClusterControlPlaneSecurityGroup28C3842D": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "EKS Control Plane Security Group",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "matilda-cluster",
+            "Value": "it-s-me"
+          }
+        ],
+        "VpcId": {
+          "Fn::ImportValue": "matilda-cluster1:ExportsOutputRefMatildaClusterDefaultVpc7780E453A90048C1"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "matilda-cluster2/MatildaCluster/ControlPlaneSecurityGroup/Resource"
+      }
+    },
+    "MatildaClusterCreationRoleD17ACCA5": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":iam::268926652121:root"
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "Tags": [
+          {
+            "Key": "matilda-cluster",
+            "Value": "admin"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "matilda-cluster2/MatildaCluster/Resource/CreationRole/Resource"
+      }
+    },
+    "MatildaClusterCreationRoleDefaultPolicyFD604B49": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "iam:PassRole",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "MatildaClusterRoleEC871D08",
+                  "Arn"
+                ]
+              }
+            },
+            {
+              "Action": [
+                "eks:CreateCluster",
+                "eks:DescribeCluster",
+                "eks:DescribeUpdate",
+                "eks:DeleteCluster",
+                "eks:UpdateClusterVersion",
+                "eks:UpdateClusterConfig",
+                "eks:CreateFargateProfile",
+                "eks:TagResource",
+                "eks:UntagResource"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":eks:ap-northeast-1:268926652121:cluster/matilda-cluster2"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":eks:ap-northeast-1:268926652121:cluster/matilda-cluster2/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": [
+                "eks:DescribeFargateProfile",
+                "eks:DeleteFargateProfile"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":eks:ap-northeast-1:268926652121:fargateprofile/matilda-cluster2/*"
+                  ]
+                ]
+              }
+            },
+            {
+              "Action": [
+                "iam:GetRole",
+                "iam:listAttachedRolePolicies"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            },
+            {
+              "Action": "iam:CreateServiceLinkedRole",
+              "Effect": "Allow",
+              "Resource": "*"
+            },
+            {
+              "Action": [
+                "ec2:DescribeInstances",
+                "ec2:DescribeNetworkInterfaces",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeSubnets",
+                "ec2:DescribeRouteTables",
+                "ec2:DescribeDhcpOptions",
+                "ec2:DescribeVpcs"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            },
+            {
+              "Action": "iam:PassRole",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "MatildaClusterfargateprofilematildafargatePodExecutionRoleFE0CBDEA",
+                  "Arn"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "MatildaClusterCreationRoleDefaultPolicyFD604B49",
+        "Roles": [
+          {
+            "Ref": "MatildaClusterCreationRoleD17ACCA5"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "matilda-cluster2/MatildaCluster/Resource/CreationRole/DefaultPolicy/Resource"
+      }
+    },
+    "MatildaCluster26775DF1": {
+      "Type": "Custom::AWSCDK-EKS-Cluster",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "awscdkawseksClusterResourceProviderNestedStackawscdkawseksClusterResourceProviderNestedStackResource9827C454",
+            "Outputs.matildacluster2awscdkawseksClusterResourceProviderframeworkonEventB8A03FD9Arn"
+          ]
+        },
+        "Config": {
+          "name": "matilda-cluster2",
+          "version": "1.21",
+          "roleArn": {
+            "Fn::GetAtt": [
+              "MatildaClusterRoleEC871D08",
+              "Arn"
+            ]
+          },
+          "resourcesVpcConfig": {
+            "subnetIds": [
+              {
+                "Fn::ImportValue": "matilda-cluster1:ExportsOutputRefMatildaClusterDefaultVpcPublicSubnet1Subnet7726E1562D36D1EA"
+              },
+              {
+                "Fn::ImportValue": "matilda-cluster1:ExportsOutputRefMatildaClusterDefaultVpcPublicSubnet2Subnet476DC84CD1C4C1BF"
+              },
+              {
+                "Fn::ImportValue": "matilda-cluster1:ExportsOutputRefMatildaClusterDefaultVpcPublicSubnet3SubnetE5EC5D06D79F2E8C"
+              },
+              {
+                "Fn::ImportValue": "matilda-cluster1:ExportsOutputRefMatildaClusterDefaultVpcPrivateSubnet1SubnetC75B874D6740CB5A"
+              },
+              {
+                "Fn::ImportValue": "matilda-cluster1:ExportsOutputRefMatildaClusterDefaultVpcPrivateSubnet2SubnetE230585E9E34142A"
+              },
+              {
+                "Fn::ImportValue": "matilda-cluster1:ExportsOutputRefMatildaClusterDefaultVpcPrivateSubnet3SubnetFCAF966FEDBE72BD"
+              }
+            ],
+            "securityGroupIds": [
+              {
+                "Fn::GetAtt": [
+                  "MatildaClusterControlPlaneSecurityGroup28C3842D",
+                  "GroupId"
+                ]
+              }
+            ],
+            "endpointPublicAccess": true,
+            "endpointPrivateAccess": true
+          }
+        },
+        "AssumeRoleArn": {
+          "Fn::GetAtt": [
+            "MatildaClusterCreationRoleD17ACCA5",
+            "Arn"
+          ]
+        },
+        "AttributesRevision": 2
+      },
+      "DependsOn": [
+        "MatildaClusterCreationRoleDefaultPolicyFD604B49",
+        "MatildaClusterCreationRoleD17ACCA5"
+      ],
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "matilda-cluster2/MatildaCluster/Resource/Resource/Default"
+      }
+    },
+    "MatildaClusterKubectlReadyBarrier56A50095": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Type": "String",
+        "Value": "aws:cdk:eks:kubectl-ready"
+      },
+      "DependsOn": [
+        "MatildaClusterfargateprofilematildafargatePodExecutionRoleFE0CBDEA",
+        "MatildaClusterfargateprofilematildafargate736F291E",
+        "MatildaClusterCreationRoleDefaultPolicyFD604B49",
+        "MatildaClusterCreationRoleD17ACCA5",
+        "MatildaCluster26775DF1"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "matilda-cluster2/MatildaCluster/KubectlReadyBarrier"
+      }
+    },
+    "MatildaClusterMastersRoleFEA6A1D7": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":iam::268926652121:root"
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "Tags": [
+          {
+            "Key": "matilda-cluster",
+            "Value": "it-s-me"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "matilda-cluster2/MatildaCluster/MastersRole/Resource"
+      }
+    },
+    "MatildaClusterAwsAuthmanifestE50C536C": {
+      "Type": "Custom::AWSCDK-EKS-KubernetesResource",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "awscdkawseksKubectlProviderNestedStackawscdkawseksKubectlProviderNestedStackResourceA7AEBA6B",
+            "Outputs.matildacluster2awscdkawseksKubectlProviderframeworkonEvent1BAA200FArn"
+          ]
+        },
+        "Manifest": {
+          "Fn::Join": [
+            "",
+            [
+              "[{\"apiVersion\":\"v1\",\"kind\":\"ConfigMap\",\"metadata\":{\"name\":\"aws-auth\",\"namespace\":\"kube-system\",\"labels\":{\"aws.cdk.eks/prune-c8583dc208ee7b33aef341e233fe6cdcbcd9c29de5\":\"\"}},\"data\":{\"mapRoles\":\"[{\\\"rolearn\\\":\\\"",
+              {
+                "Fn::GetAtt": [
+                  "MatildaClusterMastersRoleFEA6A1D7",
+                  "Arn"
+                ]
+              },
+              "\\\",\\\"username\\\":\\\"",
+              {
+                "Fn::GetAtt": [
+                  "MatildaClusterMastersRoleFEA6A1D7",
+                  "Arn"
+                ]
+              },
+              "\\\",\\\"groups\\\":[\\\"system:masters\\\"]},{\\\"rolearn\\\":\\\"",
+              {
+                "Fn::GetAtt": [
+                  "MatildaClusterNodegroupDefaultCapacityNodeGroupRole696D4E8E",
+                  "Arn"
+                ]
+              },
+              "\\\",\\\"username\\\":\\\"system:node:{{EC2PrivateDNSName}}\\\",\\\"groups\\\":[\\\"system:bootstrappers\\\",\\\"system:nodes\\\"]},{\\\"rolearn\\\":\\\"",
+              {
+                "Fn::GetAtt": [
+                  "MatildaClusterCreationRoleD17ACCA5",
+                  "Arn"
+                ]
+              },
+              "\\\",\\\"username\\\":\\\"",
+              {
+                "Fn::GetAtt": [
+                  "MatildaClusterCreationRoleD17ACCA5",
+                  "Arn"
+                ]
+              },
+              "\\\",\\\"groups\\\":[\\\"system:masters\\\"]},{\\\"rolearn\\\":\\\"",
+              {
+                "Fn::GetAtt": [
+                  "MatildaClusterNodegroupmatildanodegroup1NodeGroupRole41F21DA5",
+                  "Arn"
+                ]
+              },
+              "\\\",\\\"username\\\":\\\"system:node:{{EC2PrivateDNSName}}\\\",\\\"groups\\\":[\\\"system:bootstrappers\\\",\\\"system:nodes\\\"]},{\\\"rolearn\\\":\\\"",
+              {
+                "Fn::GetAtt": [
+                  "MatildaClusterfargateprofilematildafargatePodExecutionRoleFE0CBDEA",
+                  "Arn"
+                ]
+              },
+              "\\\",\\\"username\\\":\\\"system:node:{{SessionName}}\\\",\\\"groups\\\":[\\\"system:bootstrappers\\\",\\\"system:nodes\\\",\\\"system:node-proxier\\\"]}]\",\"mapUsers\":\"[]\",\"mapAccounts\":\"[]\"}}]"
+            ]
+          ]
+        },
+        "ClusterName": {
+          "Ref": "MatildaCluster26775DF1"
+        },
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "MatildaClusterCreationRoleD17ACCA5",
+            "Arn"
+          ]
+        },
+        "PruneLabel": "aws.cdk.eks/prune-c8583dc208ee7b33aef341e233fe6cdcbcd9c29de5",
+        "Overwrite": true
+      },
+      "DependsOn": [
+        "MatildaClusterKubectlReadyBarrier56A50095"
+      ],
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "matilda-cluster2/MatildaCluster/AwsAuth/manifest/Resource/Default"
+      }
+    },
+    "MatildaClusterNodegroupDefaultCapacityNodeGroupRole696D4E8E": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ec2.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/AmazonEKSWorkerNodePolicy"
+              ]
+            ]
+          },
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/AmazonEKS_CNI_Policy"
+              ]
+            ]
+          },
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+              ]
+            ]
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "matilda-cluster",
+            "Value": "it-s-me"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "matilda-cluster2/MatildaCluster/NodegroupDefaultCapacity/NodeGroupRole/Resource"
+      }
+    },
+    "MatildaClusterNodegroupDefaultCapacityD64C1C63": {
+      "Type": "AWS::EKS::Nodegroup",
+      "Properties": {
+        "ClusterName": {
+          "Ref": "MatildaCluster26775DF1"
+        },
+        "NodeRole": {
+          "Fn::GetAtt": [
+            "MatildaClusterNodegroupDefaultCapacityNodeGroupRole696D4E8E",
+            "Arn"
+          ]
+        },
+        "Subnets": [
+          {
+            "Fn::ImportValue": "matilda-cluster1:ExportsOutputRefMatildaClusterDefaultVpcPrivateSubnet1SubnetC75B874D6740CB5A"
+          },
+          {
+            "Fn::ImportValue": "matilda-cluster1:ExportsOutputRefMatildaClusterDefaultVpcPrivateSubnet2SubnetE230585E9E34142A"
+          },
+          {
+            "Fn::ImportValue": "matilda-cluster1:ExportsOutputRefMatildaClusterDefaultVpcPrivateSubnet3SubnetFCAF966FEDBE72BD"
+          }
+        ],
+        "AmiType": "AL2_x86_64",
+        "ForceUpdateEnabled": true,
+        "InstanceTypes": [
+          "m5.large"
+        ],
+        "ScalingConfig": {
+          "DesiredSize": 4,
+          "MaxSize": 4,
+          "MinSize": 4
+        },
+        "Tags": {
+          "matilda-cluster": "it-s-me"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "matilda-cluster2/MatildaCluster/NodegroupDefaultCapacity/Resource"
+      }
+    },
+    "MatildaClusterNodegroupmatildanodegroup1NodeGroupRole41F21DA5": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ec2.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/AmazonEKSWorkerNodePolicy"
+              ]
+            ]
+          },
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/AmazonEKS_CNI_Policy"
+              ]
+            ]
+          },
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+              ]
+            ]
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "matilda-cluster",
+            "Value": "it-s-me"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "matilda-cluster2/MatildaCluster/Nodegroupmatilda-node-group1/NodeGroupRole/Resource"
+      }
+    },
+    "MatildaClusterNodegroupmatildanodegroup1EF94136F": {
+      "Type": "AWS::EKS::Nodegroup",
+      "Properties": {
+        "ClusterName": {
+          "Ref": "MatildaCluster26775DF1"
+        },
+        "NodeRole": {
+          "Fn::GetAtt": [
+            "MatildaClusterNodegroupmatildanodegroup1NodeGroupRole41F21DA5",
+            "Arn"
+          ]
+        },
+        "Subnets": [
+          {
+            "Fn::ImportValue": "matilda-cluster1:ExportsOutputRefMatildaClusterDefaultVpcPrivateSubnet1SubnetC75B874D6740CB5A"
+          },
+          {
+            "Fn::ImportValue": "matilda-cluster1:ExportsOutputRefMatildaClusterDefaultVpcPrivateSubnet2SubnetE230585E9E34142A"
+          },
+          {
+            "Fn::ImportValue": "matilda-cluster1:ExportsOutputRefMatildaClusterDefaultVpcPrivateSubnet3SubnetFCAF966FEDBE72BD"
+          }
+        ],
+        "AmiType": "AL2_x86_64",
+        "ForceUpdateEnabled": true,
+        "InstanceTypes": [
+          "m5.xlarge"
+        ],
+        "ScalingConfig": {
+          "DesiredSize": 2,
+          "MaxSize": 2,
+          "MinSize": 1
+        },
+        "Tags": {
+          "matilda-cluster": "it-s-me"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "matilda-cluster2/MatildaCluster/Nodegroupmatilda-node-group1/Resource"
+      }
+    },
+    "MatildaClusterfargateprofilematildafargatePodExecutionRoleFE0CBDEA": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "eks-fargate-pods.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/AmazonEKSFargatePodExecutionRolePolicy"
+              ]
+            ]
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "matilda-cluster",
+            "Value": "it-s-me"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "matilda-cluster2/MatildaCluster/fargate-profile-matilda-fargate/PodExecutionRole/Resource"
+      }
+    },
+    "MatildaClusterfargateprofilematildafargate736F291E": {
+      "Type": "Custom::AWSCDK-EKS-FargateProfile",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "awscdkawseksClusterResourceProviderNestedStackawscdkawseksClusterResourceProviderNestedStackResource9827C454",
+            "Outputs.matildacluster2awscdkawseksClusterResourceProviderframeworkonEventB8A03FD9Arn"
+          ]
+        },
+        "AssumeRoleArn": {
+          "Fn::GetAtt": [
+            "MatildaClusterCreationRoleD17ACCA5",
+            "Arn"
+          ]
+        },
+        "Config": {
+          "clusterName": {
+            "Ref": "MatildaCluster26775DF1"
+          },
+          "fargateProfileName": "matilda-fargate-profile",
+          "podExecutionRoleArn": {
+            "Fn::GetAtt": [
+              "MatildaClusterfargateprofilematildafargatePodExecutionRoleFE0CBDEA",
+              "Arn"
+            ]
+          },
+          "selectors": [
+            {
+              "namespace": "2048-game"
+            }
+          ],
+          "tags": {
+            "matilda-cluster": "it-s-me"
+          }
+        }
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "matilda-cluster2/MatildaCluster/fargate-profile-matilda-fargate/Resource/Default"
+      }
+    },
+    "awscdkawseksClusterResourceProviderNestedStackawscdkawseksClusterResourceProviderNestedStackResource9827C454": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": {
+          "Fn::Join": [
+            "",
+            [
+              "https://s3.ap-northeast-1.",
+              {
+                "Ref": "AWS::URLSuffix"
+              },
+              "/",
+              {
+                "Ref": "AssetParameters5ff4b6ff9e8bea962afd34055dccbd9829bc9c8d549e29bd336970941ce305acS3BucketEE845C7A"
+              },
+              "/",
+              {
+                "Fn::Select": [
+                  0,
+                  {
+                    "Fn::Split": [
+                      "||",
+                      {
+                        "Ref": "AssetParameters5ff4b6ff9e8bea962afd34055dccbd9829bc9c8d549e29bd336970941ce305acS3VersionKeyEFDEE03C"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "Fn::Select": [
+                  1,
+                  {
+                    "Fn::Split": [
+                      "||",
+                      {
+                        "Ref": "AssetParameters5ff4b6ff9e8bea962afd34055dccbd9829bc9c8d549e29bd336970941ce305acS3VersionKeyEFDEE03C"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          ]
+        },
+        "Parameters": {
+          "referencetomatildacluster2MatildaClusterCreationRole7314483CArn": {
+            "Fn::GetAtt": [
+              "MatildaClusterCreationRoleD17ACCA5",
+              "Arn"
+            ]
+          },
+          "referencetomatildacluster2AssetParametersaa417b9073765a3bea6f13c9f810b7a8b342bfae384f894ea1686b5a96db26c5S3BucketC0DF34C0Ref": {
+            "Ref": "AssetParametersaa417b9073765a3bea6f13c9f810b7a8b342bfae384f894ea1686b5a96db26c5S3BucketDCF2C5E6"
+          },
+          "referencetomatildacluster2AssetParametersaa417b9073765a3bea6f13c9f810b7a8b342bfae384f894ea1686b5a96db26c5S3VersionKey5F72CFB5Ref": {
+            "Ref": "AssetParametersaa417b9073765a3bea6f13c9f810b7a8b342bfae384f894ea1686b5a96db26c5S3VersionKey14A74995"
+          },
+          "referencetomatildacluster2AssetParameters26ac61b4195cccf80ff73f332788ad7ffaab36d81ce570340a583a8364901665S3Bucket539106F0Ref": {
+            "Ref": "AssetParameters26ac61b4195cccf80ff73f332788ad7ffaab36d81ce570340a583a8364901665S3Bucket1B280681"
+          },
+          "referencetomatildacluster2AssetParameters26ac61b4195cccf80ff73f332788ad7ffaab36d81ce570340a583a8364901665S3VersionKey186CAEADRef": {
+            "Ref": "AssetParameters26ac61b4195cccf80ff73f332788ad7ffaab36d81ce570340a583a8364901665S3VersionKeyB1E02791"
+          },
+          "referencetomatildacluster2AssetParametersc691172cdeefa2c91b5a2907f9d81118e47597634943344795f1a844192dd49cS3BucketD7524BCCRef": {
+            "Ref": "AssetParametersc691172cdeefa2c91b5a2907f9d81118e47597634943344795f1a844192dd49cS3BucketEAC9DD43"
+          },
+          "referencetomatildacluster2AssetParametersc691172cdeefa2c91b5a2907f9d81118e47597634943344795f1a844192dd49cS3VersionKeyF7636B36Ref": {
+            "Ref": "AssetParametersc691172cdeefa2c91b5a2907f9d81118e47597634943344795f1a844192dd49cS3VersionKeyDD9AE9E7"
+          }
+        }
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "matilda-cluster2/@aws-cdk--aws-eks.ClusterResourceProvider.NestedStack/@aws-cdk--aws-eks.ClusterResourceProvider.NestedStackResource"
+      }
+    },
+    "awscdkawseksKubectlProviderNestedStackawscdkawseksKubectlProviderNestedStackResourceA7AEBA6B": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": {
+          "Fn::Join": [
+            "",
+            [
+              "https://s3.ap-northeast-1.",
+              {
+                "Ref": "AWS::URLSuffix"
+              },
+              "/",
+              {
+                "Ref": "AssetParametersa9f878291a32699e80ebca4f250c84d681eb6490c159b1074d1701c5d96e65ebS3BucketCCBEFA6F"
+              },
+              "/",
+              {
+                "Fn::Select": [
+                  0,
+                  {
+                    "Fn::Split": [
+                      "||",
+                      {
+                        "Ref": "AssetParametersa9f878291a32699e80ebca4f250c84d681eb6490c159b1074d1701c5d96e65ebS3VersionKey218C9EAA"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "Fn::Select": [
+                  1,
+                  {
+                    "Fn::Split": [
+                      "||",
+                      {
+                        "Ref": "AssetParametersa9f878291a32699e80ebca4f250c84d681eb6490c159b1074d1701c5d96e65ebS3VersionKey218C9EAA"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          ]
+        },
+        "Parameters": {
+          "referencetomatildacluster2MatildaCluster367F19E1Arn": {
+            "Fn::GetAtt": [
+              "MatildaCluster26775DF1",
+              "Arn"
+            ]
+          },
+          "referencetomatildacluster2MatildaClusterCreationRole7314483CArn": {
+            "Fn::GetAtt": [
+              "MatildaClusterCreationRoleD17ACCA5",
+              "Arn"
+            ]
+          },
+          "referencetomatildacluster2AssetParameters4129bbca38164ecb28fee8e5b674f0d05e5957b4b8ed97d9c950527b5cc4ce10S3Bucket762571ACRef": {
+            "Ref": "AssetParameters4129bbca38164ecb28fee8e5b674f0d05e5957b4b8ed97d9c950527b5cc4ce10S3BucketC6FAEEC9"
+          },
+          "referencetomatildacluster2AssetParameters4129bbca38164ecb28fee8e5b674f0d05e5957b4b8ed97d9c950527b5cc4ce10S3VersionKey49DC7E0BRef": {
+            "Ref": "AssetParameters4129bbca38164ecb28fee8e5b674f0d05e5957b4b8ed97d9c950527b5cc4ce10S3VersionKeyA7EE7421"
+          },
+          "referencetomatildacluster2MatildaCluster367F19E1ClusterSecurityGroupId": {
+            "Fn::GetAtt": [
+              "MatildaCluster26775DF1",
+              "ClusterSecurityGroupId"
+            ]
+          },
+          "referencetomatildacluster2AssetParameterse9882ab123687399f934da0d45effe675ecc8ce13b40cb946f3e1d6141fe8d68S3BucketDC2D3975Ref": {
+            "Ref": "AssetParameterse9882ab123687399f934da0d45effe675ecc8ce13b40cb946f3e1d6141fe8d68S3BucketAEADE8C7"
+          },
+          "referencetomatildacluster2AssetParameterse9882ab123687399f934da0d45effe675ecc8ce13b40cb946f3e1d6141fe8d68S3VersionKeyA7F1C83CRef": {
+            "Ref": "AssetParameterse9882ab123687399f934da0d45effe675ecc8ce13b40cb946f3e1d6141fe8d68S3VersionKeyE415415F"
+          },
+          "referencetomatildacluster2AssetParametersea17febe6d04c66048f3e8e060c71685c0cb53122abceff44842d27bc0d4a03eS3BucketE6BE13DBRef": {
+            "Ref": "AssetParametersea17febe6d04c66048f3e8e060c71685c0cb53122abceff44842d27bc0d4a03eS3BucketD3288998"
+          },
+          "referencetomatildacluster2AssetParametersea17febe6d04c66048f3e8e060c71685c0cb53122abceff44842d27bc0d4a03eS3VersionKey93F62EB6Ref": {
+            "Ref": "AssetParametersea17febe6d04c66048f3e8e060c71685c0cb53122abceff44842d27bc0d4a03eS3VersionKeyB00C0565"
+          },
+          "referencetomatildacluster2AssetParametersc691172cdeefa2c91b5a2907f9d81118e47597634943344795f1a844192dd49cS3BucketD7524BCCRef": {
+            "Ref": "AssetParametersc691172cdeefa2c91b5a2907f9d81118e47597634943344795f1a844192dd49cS3BucketEAC9DD43"
+          },
+          "referencetomatildacluster2AssetParametersc691172cdeefa2c91b5a2907f9d81118e47597634943344795f1a844192dd49cS3VersionKeyF7636B36Ref": {
+            "Ref": "AssetParametersc691172cdeefa2c91b5a2907f9d81118e47597634943344795f1a844192dd49cS3VersionKeyDD9AE9E7"
+          }
+        }
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "matilda-cluster2/@aws-cdk--aws-eks.KubectlProvider.NestedStack/@aws-cdk--aws-eks.KubectlProvider.NestedStackResource"
+      }
+    },
+    "CDKMetadata": {
+      "Type": "AWS::CDK::Metadata",
+      "Properties": {
+        "Analytics": "v2:deflate64:H4sIAAAAAAAA/1VQy27CMBD8lt4XQ4rUc1Gk9lC1ROkXGLOhJomN9lGELP87Do8+TjM7Ws3sTmWq5cIsHp7tkWdu28+Ti4QmfYp1PdQxsJA6gVpZ4tgiRyWHUHfhh/8V1yoHlYndDLrQWLIjClKGKSNhzybVQ/FDgtWRVypf8KYbpFC2+N0G3yELfMQt7ijqYTL5HV4s7axgQ7HzA2bwdjSpjcP1pgmbOHh3ukRfWAZ0j+UjdEpeTq93z39CzhlCCTF7nn9XT6WVUsqevZ+RBvEjmvaKZxCHxw4xAQAA"
+      },
+      "Metadata": {
+        "aws:cdk:path": "matilda-cluster2/CDKMetadata/Default"
+      }
+    }
+  },
+  "Outputs": {
+    "MatildaClusterConfigCommandD0D10DD3": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "aws eks update-kubeconfig --name ",
+            {
+              "Ref": "MatildaCluster26775DF1"
+            },
+            " --region ap-northeast-1 --role-arn ",
+            {
+              "Fn::GetAtt": [
+                "MatildaClusterMastersRoleFEA6A1D7",
+                "Arn"
+              ]
+            }
+          ]
+        ]
+      }
+    },
+    "MatildaClusterGetTokenCommand2618ED5C": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "aws eks get-token --cluster-name ",
+            {
+              "Ref": "MatildaCluster26775DF1"
+            },
+            " --region ap-northeast-1 --role-arn ",
+            {
+              "Fn::GetAtt": [
+                "MatildaClusterMastersRoleFEA6A1D7",
+                "Arn"
+              ]
+            }
+          ]
+        ]
+      }
+    }
+  },
+  "Parameters": {
+    "AssetParametersaa417b9073765a3bea6f13c9f810b7a8b342bfae384f894ea1686b5a96db26c5S3BucketDCF2C5E6": {
+      "Type": "String",
+      "Description": "S3 bucket for asset \"aa417b9073765a3bea6f13c9f810b7a8b342bfae384f894ea1686b5a96db26c5\""
+    },
+    "AssetParametersaa417b9073765a3bea6f13c9f810b7a8b342bfae384f894ea1686b5a96db26c5S3VersionKey14A74995": {
+      "Type": "String",
+      "Description": "S3 key for asset version \"aa417b9073765a3bea6f13c9f810b7a8b342bfae384f894ea1686b5a96db26c5\""
+    },
+    "AssetParametersaa417b9073765a3bea6f13c9f810b7a8b342bfae384f894ea1686b5a96db26c5ArtifactHash3EDFDAA1": {
+      "Type": "String",
+      "Description": "Artifact hash for asset \"aa417b9073765a3bea6f13c9f810b7a8b342bfae384f894ea1686b5a96db26c5\""
+    },
+    "AssetParameters26ac61b4195cccf80ff73f332788ad7ffaab36d81ce570340a583a8364901665S3Bucket1B280681": {
+      "Type": "String",
+      "Description": "S3 bucket for asset \"26ac61b4195cccf80ff73f332788ad7ffaab36d81ce570340a583a8364901665\""
+    },
+    "AssetParameters26ac61b4195cccf80ff73f332788ad7ffaab36d81ce570340a583a8364901665S3VersionKeyB1E02791": {
+      "Type": "String",
+      "Description": "S3 key for asset version \"26ac61b4195cccf80ff73f332788ad7ffaab36d81ce570340a583a8364901665\""
+    },
+    "AssetParameters26ac61b4195cccf80ff73f332788ad7ffaab36d81ce570340a583a8364901665ArtifactHash9EA5AC29": {
+      "Type": "String",
+      "Description": "Artifact hash for asset \"26ac61b4195cccf80ff73f332788ad7ffaab36d81ce570340a583a8364901665\""
+    },
+    "AssetParametersc691172cdeefa2c91b5a2907f9d81118e47597634943344795f1a844192dd49cS3BucketEAC9DD43": {
+      "Type": "String",
+      "Description": "S3 bucket for asset \"c691172cdeefa2c91b5a2907f9d81118e47597634943344795f1a844192dd49c\""
+    },
+    "AssetParametersc691172cdeefa2c91b5a2907f9d81118e47597634943344795f1a844192dd49cS3VersionKeyDD9AE9E7": {
+      "Type": "String",
+      "Description": "S3 key for asset version \"c691172cdeefa2c91b5a2907f9d81118e47597634943344795f1a844192dd49c\""
+    },
+    "AssetParametersc691172cdeefa2c91b5a2907f9d81118e47597634943344795f1a844192dd49cArtifactHash627DAAA7": {
+      "Type": "String",
+      "Description": "Artifact hash for asset \"c691172cdeefa2c91b5a2907f9d81118e47597634943344795f1a844192dd49c\""
+    },
+    "AssetParameters4129bbca38164ecb28fee8e5b674f0d05e5957b4b8ed97d9c950527b5cc4ce10S3BucketC6FAEEC9": {
+      "Type": "String",
+      "Description": "S3 bucket for asset \"4129bbca38164ecb28fee8e5b674f0d05e5957b4b8ed97d9c950527b5cc4ce10\""
+    },
+    "AssetParameters4129bbca38164ecb28fee8e5b674f0d05e5957b4b8ed97d9c950527b5cc4ce10S3VersionKeyA7EE7421": {
+      "Type": "String",
+      "Description": "S3 key for asset version \"4129bbca38164ecb28fee8e5b674f0d05e5957b4b8ed97d9c950527b5cc4ce10\""
+    },
+    "AssetParameters4129bbca38164ecb28fee8e5b674f0d05e5957b4b8ed97d9c950527b5cc4ce10ArtifactHash528547CD": {
+      "Type": "String",
+      "Description": "Artifact hash for asset \"4129bbca38164ecb28fee8e5b674f0d05e5957b4b8ed97d9c950527b5cc4ce10\""
+    },
+    "AssetParameterse9882ab123687399f934da0d45effe675ecc8ce13b40cb946f3e1d6141fe8d68S3BucketAEADE8C7": {
+      "Type": "String",
+      "Description": "S3 bucket for asset \"e9882ab123687399f934da0d45effe675ecc8ce13b40cb946f3e1d6141fe8d68\""
+    },
+    "AssetParameterse9882ab123687399f934da0d45effe675ecc8ce13b40cb946f3e1d6141fe8d68S3VersionKeyE415415F": {
+      "Type": "String",
+      "Description": "S3 key for asset version \"e9882ab123687399f934da0d45effe675ecc8ce13b40cb946f3e1d6141fe8d68\""
+    },
+    "AssetParameterse9882ab123687399f934da0d45effe675ecc8ce13b40cb946f3e1d6141fe8d68ArtifactHashD9A515C3": {
+      "Type": "String",
+      "Description": "Artifact hash for asset \"e9882ab123687399f934da0d45effe675ecc8ce13b40cb946f3e1d6141fe8d68\""
+    },
+    "AssetParametersea17febe6d04c66048f3e8e060c71685c0cb53122abceff44842d27bc0d4a03eS3BucketD3288998": {
+      "Type": "String",
+      "Description": "S3 bucket for asset \"ea17febe6d04c66048f3e8e060c71685c0cb53122abceff44842d27bc0d4a03e\""
+    },
+    "AssetParametersea17febe6d04c66048f3e8e060c71685c0cb53122abceff44842d27bc0d4a03eS3VersionKeyB00C0565": {
+      "Type": "String",
+      "Description": "S3 key for asset version \"ea17febe6d04c66048f3e8e060c71685c0cb53122abceff44842d27bc0d4a03e\""
+    },
+    "AssetParametersea17febe6d04c66048f3e8e060c71685c0cb53122abceff44842d27bc0d4a03eArtifactHash4654D012": {
+      "Type": "String",
+      "Description": "Artifact hash for asset \"ea17febe6d04c66048f3e8e060c71685c0cb53122abceff44842d27bc0d4a03e\""
+    },
+    "AssetParameters5ff4b6ff9e8bea962afd34055dccbd9829bc9c8d549e29bd336970941ce305acS3BucketEE845C7A": {
+      "Type": "String",
+      "Description": "S3 bucket for asset \"5ff4b6ff9e8bea962afd34055dccbd9829bc9c8d549e29bd336970941ce305ac\""
+    },
+    "AssetParameters5ff4b6ff9e8bea962afd34055dccbd9829bc9c8d549e29bd336970941ce305acS3VersionKeyEFDEE03C": {
+      "Type": "String",
+      "Description": "S3 key for asset version \"5ff4b6ff9e8bea962afd34055dccbd9829bc9c8d549e29bd336970941ce305ac\""
+    },
+    "AssetParameters5ff4b6ff9e8bea962afd34055dccbd9829bc9c8d549e29bd336970941ce305acArtifactHash74C08058": {
+      "Type": "String",
+      "Description": "Artifact hash for asset \"5ff4b6ff9e8bea962afd34055dccbd9829bc9c8d549e29bd336970941ce305ac\""
+    },
+    "AssetParametersa9f878291a32699e80ebca4f250c84d681eb6490c159b1074d1701c5d96e65ebS3BucketCCBEFA6F": {
+      "Type": "String",
+      "Description": "S3 bucket for asset \"a9f878291a32699e80ebca4f250c84d681eb6490c159b1074d1701c5d96e65eb\""
+    },
+    "AssetParametersa9f878291a32699e80ebca4f250c84d681eb6490c159b1074d1701c5d96e65ebS3VersionKey218C9EAA": {
+      "Type": "String",
+      "Description": "S3 key for asset version \"a9f878291a32699e80ebca4f250c84d681eb6490c159b1074d1701c5d96e65eb\""
+    },
+    "AssetParametersa9f878291a32699e80ebca4f250c84d681eb6490c159b1074d1701c5d96e65ebArtifactHash80B63626": {
+      "Type": "String",
+      "Description": "Artifact hash for asset \"a9f878291a32699e80ebca4f250c84d681eb6490c159b1074d1701c5d96e65eb\""
+    }
+  }
+}
