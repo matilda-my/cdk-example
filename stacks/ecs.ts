@@ -4,7 +4,7 @@ import * as ecs from '@aws-cdk/aws-ecs';
 import * as ec2 from '@aws-cdk/aws-ec2';
 
 export class ECSStack extends cdk.Stack {
-    constructor(scope: cdk.Construct, id: string, props: MatildaProps) {
+    constructor(scope: cdk.Construct, id: string, props: cdk.StackProps) {
         super(scope, id, props);
 
         const clusterName: string = props.ecsId + '-cluster';
